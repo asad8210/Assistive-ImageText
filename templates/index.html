@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistive ImageText</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; padding: 0 10px; }
+        .error { color: red; font-weight: bold; margin: 10px 0; }
+        .section { margin: 20px 0; }
+        img.preview-img { max-width: 100%; height: auto; border-radius: 4px; }
+        textarea { width: 100%; height: 120px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; padding: 8px; }
+        .braille-container textarea { font-family: 'Courier New', monospace; }
+        #upload-status { display: none; margin: 10px 0; }
+        #progress-bar-container { width: 100%; background: #e0e0e0; height: 20px; border-radius: 5px; overflow: hidden; }
+        #progress-bar { width: 0; height: 100%; background: #4caf50; transition: width 0.3s; }
+        #speed-text { margin-top: 5px; font-size: 14px; color: #555; }
+        .upload-form { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; }
+        .upload-form label { font-weight: bold; align-self: center; }
+        .upload-form input[type="file"] { flex: 1; }
+        .upload-form button { padding: 8px 16px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .upload-form button:hover { background: #45a049; }
+        .upload-form button:disabled { background: #ccc; cursor: not-allowed; }
+        .spinner { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #4caf50; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @media (max-width: 600px) {
+            .upload-form { flex-direction: column; }
+            textarea { height: 100px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assistive Technology</h1>
+        <img src="{{ url_for('static', filename='images/WhatsApp Image 2025-05-30 at 16.24.25_e44f2172.jpg') }}"
+             alt="Braille Script Image" class="preview-img" aria-label="Braille script example">
+
+        <form id="image-form" action="{{ url_for('index') }}" method="post" enctype="multipart/form-data" class="upload-form">
+            <label for="image">Upload an Image:</label>
+            <input type="file" name="image" id="image" accept="image/jpeg,image/png" required aria-required="true">
+            <button type="submit" id="submit-btn">Process Image</button>
+            <span class="spinner" id="spinner"></span>
+        </form>
+
+        <div id="upload-status">
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <p id="speed-text"></p>
+        </div>
+
+        {% if error %}
+        <p class="error" role="alert">{{ error }}</p>
+        {% endif %}
+
+        {% if extracted_text %}
+        <hr>
+        <h2>Result</h2>
+        <div class="section">
+            <h3>Extracted Text (Language: {{ detected_lang | capitalize }})</h3>
+            <textarea readonly aria-label="Extracted text">{{ extracted_text }}</textarea>
+        </div>
+        <div class="section">
+            <h3>Braille Translation</h3>
+            <div class="braille-container">
+                <textarea readonly aria-label="Braille translation">{{ braille_text }}</textarea>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Audio Output</h3>
+            <audio controls aria-label="Audio output of extracted text">
+                <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+        <div class="section">
+            <h3>Uploaded Image</h3>
+            <img src="{{ url_for('static', filename=original_image) }}" alt="Uploaded image" class="preview-img" aria-label="Uploaded image">
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('image-form');
+            const submitBtn = document.getElementById('submit-btn');
+            const spinner = document.getElementById('spinner');
+            const progressBar = document.getElementById('progress-bar');
+            const uploadStatus = document.getElementById('upload-status');
+            const speedText = document.getElementById('speed-text');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                spinner.style.display = 'inline-block';
+                uploadStatus.style.display = 'flex';
+                progressBar.style.width = '0%';
+                speedText.textContent = '';
+
+                const startTime = performance.now();
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percent = (event.loaded / event.total) * 100;
+                        progressBar.style.width = `${percent.toFixed(2)}%`;
+                        const elapsedTime = (performance.now() - startTime) / 1000;
+                        const speed = (event.loaded / 1024 / elapsedTime).toFixed(2);
+                        speedText.textContent = `Upload speed: ${speed} KB/s`;
+                    }
+                };
+
+                xhr.onload = () => {
+                    uploadStatus.style.display = 'none';
+                    spinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                    if (xhr.status === 200) {
+                        form.submit();
+                    } else {
+                        alert(`Upload failed: ${xhr.statusText}`);
+                    }
+                };
+
+                xhr.onerror = () => {
+                    uploadStatus.style.display = 'none';
+                    spinner.style.display = 'none';
+                    submitBtn.disabled = false;
+                    alert('Upload error occurred.');
+                };
+
+                xhr.open(form.method, form.action);
+                xhr.send(new FormData(form));
+            });
+        });
+    </script>
+</body>
+</html>

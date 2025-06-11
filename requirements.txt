@@ -1,0 +1,1 @@
+Flask==3.0.3 Pillow==10.4.0 pytesseract==0.3.13 gTTS==2.5.3 Werkzeug==3.0.4 langdetect==1.0.9 gunicorn==22.0.0 redis[asyncio]==5.1.1 apscheduler==4.0.0

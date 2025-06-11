@@ -1,0 +1,165 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f2f4f8;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  color: #004085;
+}
+
+.upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin-top: 20px;
+}
+
+.upload-form input[type="file"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.upload-form button {
+  padding: 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.upload-form button:hover {
+  background-color: #0056b3;
+}
+
+.upload-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+#upload-status {
+  display: none;
+  margin-top: 10px;
+  width: 100%;
+}
+
+#progress-bar-container {
+  width: 100%;
+  background-color: #f3f3f3;
+  height: 20px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background-color: #3f87d4;
+  transition: width 0.3s ease;
+}
+
+#speed-text {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+}
+
+.result-section {
+  margin-top: 30px;
+}
+
+.preview-img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.output-box {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-left: 5px solid #007bff;
+  border-radius: 5px;
+  font-size: 1rem;
+  white-space: pre-wrap;
+}
+
+.braille {
+  font-family: "Courier New", monospace;
+  letter-spacing: 2px;
+  font-size: 1.2rem;
+}
+.braille-container:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+}
+
+audio {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.back-btn {
+  display: inline-block;
+  margin-top: 30px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  padding: 10px;
+  background: #ffe6e6;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.spinner {
+  display: none;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3f87d4;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+  align-self: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 600px) {
+  .container {
+    margin: 20px;
+    padding: 20px;
+  }
+  .braille-container {
+    max-width: 100%;
+    height: 180px;
+  }
+}

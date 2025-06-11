@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: Braille-Assistive-Reader
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: REDIS_URL
+        sync: false
+        description: Redis URL for caching (e.g., redis://red-xxxx:6379)
+    healthCheckPath: /health
+    autoDeploy: true
