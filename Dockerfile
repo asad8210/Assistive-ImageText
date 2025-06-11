@@ -16,8 +16,8 @@ RUN apt-get update && \
         libgl1 \
         libsm6 \
         libxext6 \
-        libxrender-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+        libxrender-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
 RUN python -m venv /venv
@@ -31,8 +31,11 @@ RUN pip install --upgrade pip && \
 # Copy app source code
 COPY . .
 
-# Expose port (Render assigns dynamically via $PORT)
+# Optional: default port fallback for local testing
+ENV PORT=8000
+
+# Expose port for container
 EXPOSE $PORT
 
 # Command to run the app with Gunicorn
-CMD ["gunicorn", "--workers", "2","2", "--bind", "0.0.0.0:$PORT", "app:app"]
+CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:$PORT", "app:app"]
