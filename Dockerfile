@@ -32,7 +32,7 @@ RUN pip install --upgrade pip && \
 COPY . .
 
 # Optional: default port fallback for local testing
-ENV PORT=8000
+ENV PORT=5000
 
 # Expose port for container
 EXPOSE $PORT
