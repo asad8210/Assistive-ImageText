@@ -1,10 +1,9 @@
-Flask==3.0.3
-Pillow==10.4.0
-pytesseract==0.3.13
-gTTS==2.5.3
-Werkzeug==3.0.4
-langdetect==1.0.9
+Flask==2.3.2
 gunicorn==22.0.0
-redis[asyncio]==5.1.1
-apscheduler==3.10.4
+pillow==10.0.0
+pytesseract==0.3.10
+gTTS==2.3.0
+langdetect==1.0.9
+redis==4.5.5
+apscheduler==3.10.1
 pyttsx3==2.90
