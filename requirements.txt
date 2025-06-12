@@ -6,4 +6,4 @@ Werkzeug==3.0.4
 langdetect==1.0.9
 gunicorn==22.0.0
 redis[asyncio]==5.1.1
-apscheduler==4.0.0
+apscheduler==3.10.4
