@@ -122,7 +122,10 @@ def cleanup_files():
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(cleanup_files, 'interval', hours=1)
-scheduler.start()
+
+# Only start the scheduler in non-production environments to save memory
+if os.environ.get("FLASK_ENV") != "production":
+    scheduler.start()
 
 @app.errorhandler(413)
 def too_large(e):
