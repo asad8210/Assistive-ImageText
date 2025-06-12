@@ -38,4 +38,4 @@ ENV PORT=5000
 EXPOSE $PORT
 
 # Command to run the app with Gunicorn
-CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:$PORT", "app:app"]
+CMD exec gunicorn --workers 2 --bind 0.0.0.0:${PORT} app:app
