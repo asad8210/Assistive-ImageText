@@ -4,7 +4,7 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for Tesseract and image processing
+# Install system dependencies for Tesseract, image processing, and espeak for pyttsx3
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         tesseract-ocr \
@@ -14,7 +14,10 @@ RUN apt-get update && \
         libgl1 \
         libsm6 \
         libxext6 \
-        libxrender-dev && \
+        libxrender-dev \
+        espeak \
+        libespeak1 \
+        libespeak-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
