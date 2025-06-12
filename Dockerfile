@@ -1,17 +1,15 @@
-# Use official Python 3.10 slim image
+# Use official slim Python 3.10 image
 FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies for Tesseract and image processing
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         tesseract-ocr \
         tesseract-ocr-eng \
         tesseract-ocr-hin \
-        tesseract-ocr-tam \
-        tesseract-ocr-spa \
         libtesseract-dev \
         libgl1 \
         libsm6 \
@@ -31,11 +29,11 @@ RUN pip install --upgrade pip && \
 # Copy app source code
 COPY . .
 
-# Set default port if not provided
+# Set default port (overrideable by Render)
 ENV PORT=5000
 
-# Expose port for container runtime
-EXPOSE ${PORT}
+# Expose the port
+EXPOSE $PORT
 
-# Start the application using Gunicorn
-CMD exec gunicorn --workers 2 --bind 0.0.0.0:${PORT} app:app
+# Use a single worker to reduce memory usage, preload to reduce duplicate RAM
+CMD exec gunicorn --preload --workers 1 --bind 0.0.0.0:${PORT} app:app
