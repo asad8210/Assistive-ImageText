@@ -28,19 +28,26 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['AUDIO_FOLDER'] = AUDIO_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB limit
 
-# Redis caching
-redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-try:
-    redis_client = redis.from_url(redis_url, decode_responses=True)
-    redis_client.ping()
-    logger.info("Connected to Redis for caching")
-except redis.ConnectionError:
-    logger.warning("Redis connection failed, caching disabled")
-    redis_client = None
+# Redis caching setup (optional)
+redis_url = os.environ.get('REDIS_URL')
+redis_client = None
+if redis_url:
+    try:
+        redis_client = redis.from_url(redis_url, decode_responses=False)
+        redis_client.ping()
+        logger.info("Connected to Redis for caching")
+    except redis.ConnectionError:
+        logger.warning("Redis connection failed, caching disabled")
+        redis_client = None
+else:
+    logger.info("No REDIS_URL provided, caching disabled")
 
 # Language map for OCR and TTS
 language_map = {
-    'en': ('eng', 'en'), 'hi': ('hin', 'hi'), 'ta': ('tam', 'ta'), 'es': ('spa', 'es')
+    'en': ('eng', 'en'),
+    'hi': ('hin', 'hi'),
+    'ta': ('tam', 'ta'),
+    'es': ('spa', 'es')
 }
 
 # Braille character map for English and Hindi
@@ -87,15 +94,19 @@ braille_map = {
 
 @lru_cache(maxsize=128)
 def text_to_braille(text):
-    return ''.join(braille_map.get(ch, ' ') for ch in text)
+    return ''.join(braille_map.get(ch.lower(), ' ') for ch in text)
 
 def save_tts_audio(text, lang, path, max_retries=3):
+    # Use MD5 hash as cache key
     text_hash = hashlib.md5((text + lang).encode()).hexdigest()
     cache_key = f"tts:{text_hash}"
+
+    # Try to serve from Redis cache
     if redis_client and redis_client.exists(cache_key):
-        logger.info(f"Serving TTS from cache: {cache_key}")
+        logger.info(f"Serving TTS from Redis cache: {cache_key}")
+        audio_bytes = redis_client.get(cache_key)
         with open(path, 'wb') as f:
-            f.write(redis_client.get(cache_key))
+            f.write(audio_bytes)
         return
 
     retry_count = 0
@@ -115,7 +126,7 @@ def save_tts_audio(text, lang, path, max_retries=3):
                 backoff *= 2
                 retry_count += 1
             else:
-                logger.error(f"TTS gTTS error: {str(e)}")
+                logger.error(f"gTTS error: {str(e)}")
                 break
         except Exception as e:
             logger.error(f"Unexpected TTS error: {str(e)}")
@@ -140,7 +151,7 @@ def cleanup_files():
         try:
             for filename in os.listdir(folder):
                 file_path = os.path.join(folder, filename)
-                if os.path.getmtime(file_path) < now - 3600:
+                if os.path.getmtime(file_path) < now - 3600:  # older than 1 hour
                     os.remove(file_path)
                     logger.info(f"Deleted file: {file_path}")
         except Exception as e:
@@ -220,6 +231,7 @@ def index():
                                detected_lang=detected_lang)
 
     return render_template('index.html')
-    
+
 if __name__ == '__main__':
-    app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
