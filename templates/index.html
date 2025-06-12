@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Assistive ImageText</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 800px; margin: auto; padding: 0 10px; }
@@ -37,9 +37,9 @@
         <img src="{{ url_for('static', filename='images/WhatsApp Image 2025-05-30 at 16.24.25_e44f2172.jpg') }}"
              alt="Braille Script Image" class="preview-img" aria-label="Braille script example">
 
-        <form id="image-form" action="{{ url_for('index') }}" method="post" enctype="multipart/form-data" class="upload-form">
+        <form id="image-form" action="{{ url_for('index') }}" method="post" enctype="multipart/form-data" class="upload-form" novalidate>
             <label for="image">Upload an Image:</label>
-            <input type="file" name="image" id="image" accept="image/jpeg,image/png" required aria-required="true">
+            <input type="file" name="image" id="image" accept="image/jpeg,image/png" required aria-required="true" />
             <button type="submit" id="submit-btn">Process Image</button>
             <span class="spinner" id="spinner"></span>
         </form>
@@ -56,28 +56,32 @@
         {% endif %}
 
         {% if extracted_text %}
-        <hr>
+        <hr />
         <h2>Result</h2>
+
         <div class="section">
             <h3>Extracted Text (Language: {{ detected_lang | capitalize }})</h3>
             <textarea readonly aria-label="Extracted text">{{ extracted_text }}</textarea>
         </div>
+
         <div class="section">
             <h3>Braille Translation</h3>
             <div class="braille-container">
                 <textarea readonly aria-label="Braille translation">{{ braille_text }}</textarea>
             </div>
         </div>
+
         <div class="section">
             <h3>Audio Output</h3>
             <audio controls aria-label="Audio output of extracted text">
-                <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg">
+                <source src="{{ url_for('static', filename=audio_file) }}" type="audio/mpeg" />
                 Your browser does not support the audio element.
             </audio>
         </div>
+
         <div class="section">
             <h3>Uploaded Image</h3>
-            <img src="{{ url_for('static', filename=original_image) }}" alt="Uploaded image" class="preview-img" aria-label="Uploaded image">
+            <img src="{{ url_for('static', filename=original_image) }}" alt="Uploaded image" class="preview-img" aria-label="Uploaded image" />
         </div>
         {% endif %}
     </div>
@@ -93,6 +97,12 @@
 
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
                 submitBtn.disabled = true;
                 spinner.style.display = 'inline-block';
                 uploadStatus.style.display = 'flex';
@@ -113,24 +123,28 @@
                 };
 
                 xhr.onload = () => {
-                    uploadStatus.style.display = 'none';
-                    spinner.style.display = 'none';
                     submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    uploadStatus.style.display = 'none';
+
                     if (xhr.status === 200) {
-                        form.submit();
+                        // Replace page content with the server response
+                        document.open();
+                        document.write(xhr.responseText);
+                        document.close();
                     } else {
                         alert(`Upload failed: ${xhr.statusText}`);
                     }
                 };
 
                 xhr.onerror = () => {
-                    uploadStatus.style.display = 'none';
-                    spinner.style.display = 'none';
                     submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    uploadStatus.style.display = 'none';
                     alert('Upload error occurred.');
                 };
 
-                xhr.open(form.method, form.action);
+                xhr.open('POST', form.action);
                 xhr.send(new FormData(form));
             });
         });
